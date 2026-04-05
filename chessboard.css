@@ -1,0 +1,28 @@
+body {
+background-color:steelblue;
+}
+
+.board{
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    top: 9vh; 
+    right: calc(50vw - 41vh);
+    border: 1vh solid #4D2C26
+}
+
+.row{
+    display: flex;
+}
+
+.square{
+    height: 10vh;
+    width: 10vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 3.5em;
+    border: 0px;
+}
+
+
