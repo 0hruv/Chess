@@ -26,3 +26,9 @@ background-color:steelblue;
 }
 
 
+.move-dot{
+    height: 3vh;
+    width: 3vh;
+    border-radius: 3vh;
+    background-color:#fca33e;
+}

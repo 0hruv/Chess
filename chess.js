@@ -11,10 +11,9 @@ const chessPiecesMap = {
 let currentBoard = create2DArray(8);
 let turn = "white";
 let selected = [-1,-1];
+let nothingSelected = [ - 1 , -1]; //constant array
 
 createChessBoard();
-
-
 
 function createChessBoard()
 {
@@ -29,20 +28,17 @@ function createChessBoard()
             let chessSquare = document.createElement("button");
             chessSquare.className = "square";
 
-            if ((i+j) % 2 == 0)
-            {
-                chessSquare.style.backgroundColor = "#EBECD0";
-            }
-            else{
-                chessSquare.style.backgroundColor = "#B58863";
-            }
-            
             chessSquare.id = "square" + i + j;
             chessSquare.textContent = setBoard(i,j);
+            
+            setColor(i,j,chessSquare);
 
             currentBoard[i][j] = chessSquare.textContent;
 
-            chessSquare.addEventListener("click",movePiece(i,j,chessSquare.textContent));
+            chessSquare.addEventListener('click', () => {
+            movePiece(i,j,chessSquare.textContent)
+            }
+            );
 
             chessRow.appendChild(chessSquare);
         }
@@ -68,7 +64,6 @@ function setBoard(i , j)
     {
         return " ";
     }
-
     if ( i == 1)
     {
         return chessPieces[5];
@@ -77,7 +72,6 @@ function setBoard(i , j)
     {
         return chessPieces[6];
     }
-
     if (j > 4)
     {
         j = 7-j;
@@ -89,14 +83,17 @@ function setBoard(i , j)
 
 function movePiece(i , j , piece )
 {
-    if ((piece == " " && selected == [-1,-1]) || getPieceColor(piece) != turn )
+    if ((piece == " " && EqualArray(nothingSelected,selected)) || getPieceColor(piece) != turn )
     {
         return ;
     }
 
     else{
+        cancelSelect();
+
         let selectedSquare = document.getElementById("square"+i+j);
-        selectedSquare.style.backgroundColor = "#b99b15";
+        selectedSquare.style.backgroundColor = "#fca33e";
+        selected = [i ,j];
     }
 }
 
@@ -109,4 +106,38 @@ function getPieceColor(symbol) {
     else if (code >= 0x265A && code <= 0x265F) {
         return "black";
     }
+}
+
+function cancelSelect()
+{
+    if ( EqualArray(nothingSelected,selected) == false ){
+        let x = selected[0];
+        let y = selected[1];
+        setColor(x,y,document.getElementById("square"+ x + y));    
+    }
+    return ;
+}
+
+function setColor(i,j,chessSquare)
+{
+        if ((i+j) % 2 == 0)
+        {
+            chessSquare.style.backgroundColor = "#EBECD0";
+        }
+        else{
+            chessSquare.style.backgroundColor = "#B58863";
+        }
+}
+
+function EqualArray( a , b)
+{
+    for (let index = 0 ; index < a.length ; index++)
+    {
+        if (a[index] != b[index])
+        {
+            return false;
+        }
+    }
+    return true;
+
 }
