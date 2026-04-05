@@ -8,8 +8,8 @@ const chessPiecesMap = {
     b_king: "♚", b_queen: "♛", b_rook: "♜", b_bishop: "♝", b_knight: "♞", b_pawn: "♟"
 };
 
-let currentBoard = create2DArray(8);
-let turn = "white";
+// let currentBoard = create2DArray(8);
+let turn = "black";
 let selected = [-1,-1];
 let nothingSelected = [ - 1 , -1]; //constant array
 let moves = [];
@@ -35,7 +35,7 @@ function createChessBoard()
             
             setColor(i,j,chessSquare);
 
-            currentBoard[i][j] = chessSquare.textContent;
+            // currentBoard[i][j] = chessSquare.textContent;
 
             chessSquare.addEventListener('click', () => {
             selectPiece(i,j,chessSquare.textContent)
@@ -43,23 +43,22 @@ function createChessBoard()
             );
 
             chessRow.appendChild(chessSquare);
-            console.log(chessSquare.id);
         }
         chessBoard.appendChild(chessRow);
     }
 }
 
-function create2DArray(a)
-{
-    let arr = new Array(a);
+// function create2DArray(a)
+// {
+//     let arr = new Array(a);
 
-    for (let i =0 ; i < a ; i++)
-    {
-        arr[i] = new Array(a);
-    }
+//     for (let i =0 ; i < a ; i++)
+//     {
+//         arr[i] = new Array(a);
+//     }
 
-    return arr;
-}
+//     return arr;
+// }
 
 function setBoard(i , j)
 {
@@ -99,7 +98,7 @@ function selectPiece(i , j , piece )
     else{
         cancelSelect();
 
-        let selectedSquare = document.getElementById("square"+i+j);
+        let selectedSquare = getID(i,j);
         selectedSquare.style.backgroundColor = "#fca33e";
         selected = [i ,j];
 
@@ -125,9 +124,29 @@ function cancelSelect()
     if ( EqualArray(nothingSelected,selected) == false ){
         let x = selected[0];
         let y = selected[1];
-        setColor(x,y,document.getElementById("square"+ x + y));    
+        setColor(x,y,getID(x,y));    
     }
-    return ;
+    else{
+        return ;
+    }
+    
+    console.log("HI!");
+    for (let index = 0 ; index < 2 ; index++)
+    {
+        let boxParent = getID(moves[index][0],moves[index][1]);
+        boxParent.removeChild(boxParent.lastChild);
+    }
+
+    for (let index = 0 ; index < captureMoves.length ; index++)
+    {
+        let x = captureMoves[index][0];
+        let y = captureMoves[index][1];
+        setColor(x,y,getID(x,y));
+    }
+
+    moves = [];
+    captureMoves = [];
+
 }
 
 function setColor(i,j,chessSquare)
@@ -157,14 +176,14 @@ function EqualArray( a , b)
 function showMoves(i , j , piece)
 {
     switch (piece) {
-    case chessPiecesMap.w_pawn:
-        whitePawn(i,j);
+    case chessPiecesMap.b_pawn:
+        blackPawn(i,j);
         break;
     }
-
+    
     for (let a = 0 ; a < moves.length ; a++)
     {
-        let possibleMove = document.getElementById("square"+moves[a][0] + moves[a][1]);
+        let possibleMove = getID(moves[a][0] ,moves[a][1]);
         let moveDot = document.createElement("div");
         moveDot.className = "move-dot";
         possibleMove.appendChild(moveDot);
@@ -172,26 +191,29 @@ function showMoves(i , j , piece)
 
     for (let a = 0 ; a < captureMoves.length ; a++)
     {
-        let possibleMove = document.getElementById("square"+captureMoves[a][0] + captureMoves[a][1]);
+        let possibleMove = getID(captureMoves[a][0] ,captureMoves[a][1]);
         possibleMove.style.backgroundColor = "red";
     }
 
 
 }
 
-function whitePawn(i,j)
+function blackPawn(i,j)
 {
     let forward = [[i+1,j]];
-    if (i == 6)
+    if (i == 1)
     {
         forward.push([i+2,j]);
     }
+    let clr = getColor(i,j);
 
     for (let a = 0 ; a<forward.length ; a++)
     {
-        if (checkObstruction(forward[a][0],forward[a][1],getPieceColor(getPiece(forward[a][0],forward[a][1]))) == 0)
+        let x = forward[a][0];
+        let y = forward[a][1];
+        if (checkObstruction(x,y,clr) == 0)
         {
-            moves.push([forward[a]]);
+            moves.push(forward[a]);
         }
         else{
             break;
@@ -202,16 +224,17 @@ function whitePawn(i,j)
 
     for (let a = 0 ; a<diagonal.length ; a++)
     {
-        if (checkObstruction(diagonal[a][0],diagonal[a][1],getPieceColor(getPiece(diagonal[a][0],diagonal[a][1]))) == 2)
+        let x = diagonal[a][0];
+        let y = diagonal[a][1];
+        if (checkObstruction(x,y,clr) == 2)
         {
-            captureMoves.push([diagonal[a]]);
+            captureMoves.push(diagonal[a]);
         }
     }
 }
 
-function checkObstruction(i,j)
+function checkObstruction(i,j,color)
 {
-    console.log(i,j);
     if (!inBoundary(i,j))
     {
         return -1;
@@ -220,7 +243,7 @@ function checkObstruction(i,j)
     {
         return 0; //no obstruction
     }
-    else if (getPieceColor(getPiece(i,j)) == color)
+    else if (getColor(i,j) == color)
     {
         return 1; //same color 
     }
@@ -231,8 +254,7 @@ function checkObstruction(i,j)
 
 function getPiece(i,j)
 {
-    console.log("here!" + "square"+i+j);
-    return document.getElementById("square"+i+j).textContent;
+    return getID(i,j).textContent;
 }
 
 function inBoundary(i,j)
@@ -242,4 +264,14 @@ function inBoundary(i,j)
         return true;
     }
     return false;
+}
+
+function getColor(i,j)
+{
+    return getPieceColor(getPiece(i,j));
+}
+
+function getID(i,j)
+{
+    return document.getElementById("square"+i+j);
 }
