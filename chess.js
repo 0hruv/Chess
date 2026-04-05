@@ -12,6 +12,8 @@ let currentBoard = create2DArray(8);
 let turn = "white";
 let selected = [-1,-1];
 let nothingSelected = [ - 1 , -1]; //constant array
+let moves = [];
+let captureMoves = [];
 
 createChessBoard();
 
@@ -36,11 +38,12 @@ function createChessBoard()
             currentBoard[i][j] = chessSquare.textContent;
 
             chessSquare.addEventListener('click', () => {
-            movePiece(i,j,chessSquare.textContent)
+            selectPiece(i,j,chessSquare.textContent)
             }
             );
 
             chessRow.appendChild(chessSquare);
+            console.log(chessSquare.id);
         }
         chessBoard.appendChild(chessRow);
     }
@@ -81,12 +84,17 @@ function setBoard(i , j)
     
 }
 
-function movePiece(i , j , piece )
+function selectPiece(i , j , piece )
 {
     if ((piece == " " && EqualArray(nothingSelected,selected)) || getPieceColor(piece) != turn )
     {
         return ;
     }
+
+    // if (!EqualArray(nothingSelected,selected) )
+    // {
+
+    // }
 
     else{
         cancelSelect();
@@ -94,6 +102,10 @@ function movePiece(i , j , piece )
         let selectedSquare = document.getElementById("square"+i+j);
         selectedSquare.style.backgroundColor = "#fca33e";
         selected = [i ,j];
+
+        showMoves(i,j,piece);
+
+
     }
 }
 
@@ -140,4 +152,94 @@ function EqualArray( a , b)
     }
     return true;
 
+}
+
+function showMoves(i , j , piece)
+{
+    switch (piece) {
+    case chessPiecesMap.w_pawn:
+        whitePawn(i,j);
+        break;
+    }
+
+    for (let a = 0 ; a < moves.length ; a++)
+    {
+        let possibleMove = document.getElementById("square"+moves[a][0] + moves[a][1]);
+        let moveDot = document.createElement("div");
+        moveDot.className = "move-dot";
+        possibleMove.appendChild(moveDot);
+    }
+
+    for (let a = 0 ; a < captureMoves.length ; a++)
+    {
+        let possibleMove = document.getElementById("square"+captureMoves[a][0] + captureMoves[a][1]);
+        possibleMove.style.backgroundColor = "red";
+    }
+
+
+}
+
+function whitePawn(i,j)
+{
+    let forward = [[i+1,j]];
+    if (i == 6)
+    {
+        forward.push([i+2,j]);
+    }
+
+    for (let a = 0 ; a<forward.length ; a++)
+    {
+        if (checkObstruction(forward[a][0],forward[a][1],getPieceColor(getPiece(forward[a][0],forward[a][1]))) == 0)
+        {
+            moves.push([forward[a]]);
+        }
+        else{
+            break;
+        }
+    }
+
+    let diagonal = [[i+1,j-1],[i+1,j+1]];
+
+    for (let a = 0 ; a<diagonal.length ; a++)
+    {
+        if (checkObstruction(diagonal[a][0],diagonal[a][1],getPieceColor(getPiece(diagonal[a][0],diagonal[a][1]))) == 2)
+        {
+            captureMoves.push([diagonal[a]]);
+        }
+    }
+}
+
+function checkObstruction(i,j)
+{
+    console.log(i,j);
+    if (!inBoundary(i,j))
+    {
+        return -1;
+    }
+    else if (getPiece(i,j) == " " )
+    {
+        return 0; //no obstruction
+    }
+    else if (getPieceColor(getPiece(i,j)) == color)
+    {
+        return 1; //same color 
+    }
+    else{
+        return 2;//different color(enemy)
+    }
+}
+
+function getPiece(i,j)
+{
+    console.log("here!" + "square"+i+j);
+    return document.getElementById("square"+i+j).textContent;
+}
+
+function inBoundary(i,j)
+{
+    if (i >= 0  && i < 8 && j >= 0 && j < 8)
+    {
+        return true;
+    }
+    return false;
 }
