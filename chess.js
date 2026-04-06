@@ -8,7 +8,7 @@ const chessPiecesMap = {
     b_king: "♚", b_queen: "♛", b_rook: "♜", b_bishop: "♝", b_knight: "♞", b_pawn: "♟"
 };
 
-// let currentBoard = create2DArray(8);
+let currentBoard = create2DArray(8);
 let turn = "white";
 let selected = [-1,-1];
 let nothingSelected = [ - 1 , -1]; //constant array
@@ -35,7 +35,7 @@ function createChessBoard()
             
             setColor(i,j,chessSquare);
 
-            // currentBoard[i][j] = chessSquare.textContent;
+            currentBoard[i][j] = chessSquare.textContent;
 
             chessSquare.addEventListener('click', () => {
             selectPiece(i,j,chessSquare.textContent)
@@ -48,17 +48,17 @@ function createChessBoard()
     }
 }
 
-// function create2DArray(a)
-// {
-//     let arr = new Array(a);
+function create2DArray(a)
+{
+    let arr = new Array(a);
 
-//     for (let i =0 ; i < a ; i++)
-//     {
-//         arr[i] = new Array(a);
-//     }
+    for (let i =0 ; i < a ; i++)
+    {
+        arr[i] = new Array(a);
+    }
 
-//     return arr;
-// }
+    return arr;
+}
 
 function setBoard(i , j)
 {
@@ -85,37 +85,27 @@ function setBoard(i , j)
 
 function selectPiece(i , j , piece )
 {
-    if (piece != " " && getPieceColor(piece) != turn)
+    if (isSomethingSelected() == false && getPieceColor(piece) != turn)//works for selecting either empty spaces or non-turn pieces
     {
         return ;
     }
 
-    else if (piece == " " )
+    else if (piece == " " && arrayExistsIn2dArray(moves , i , j) )
     {
-        if ( isSomethingSelected() == false) {
-            return ;
-        }
-
-        else 
-        {
-            let foundMove = false;
-            for (let index = 0 ; index < moves.length ; index++)//can be replaced by checking whether we have a move-dot in there or not
-            {
-                if (EqualArray(moves[index],[i,j]))
-                {
-                    foundMove = true;
-                    break;
-                }
-            }
-
-            if (foundMove){
-                movePiece(i,j);
-            }
-        }
+        movePiece(i,j);
     }
 
-    else{
+    else if(isSomethingSelected() == true && getPieceColor(piece) != turn)
+    {
+        if (arrayExistsIn2dArray(captureMoves , i , j)){
+                movePiece(i,j);
+            }
+    }
+
+    else{//basically the piece is the colour of the turn
+        if (isSomethingSelected() == true){
         cancelSelect();
+        }
 
         let selectedSquare = getID(i,j);
         selectedSquare.style.backgroundColor = "#fca33e";
@@ -140,14 +130,9 @@ function getPieceColor(symbol) {
 
 function cancelSelect()
 {
-    if ( isSomethingSelected() == true ){
-        let x = selected[0];
-        let y = selected[1];
-        setColor(x,y,getID(x,y));    
-    }
-    else{
-        return ;
-    }
+    let x = selected[0];
+    let y = selected[1];
+    setColor(x,y,getID(x,y));    //changed the issomethingselected here , might break !!
     
     for (let index = 0 ; index < moves.length ; index++)
     {
@@ -164,6 +149,7 @@ function cancelSelect()
 
     moves = [];
     captureMoves = [];//resetting
+    selected = [-1 , -1];
 
 }
 
@@ -194,9 +180,11 @@ function EqualArray( a , b)
 function showMoves(i , j , piece)
 {
     switch (piece) {
+    
     case chessPiecesMap.b_pawn:
         Pawn(i,j,"black");
         break;
+
     case chessPiecesMap.w_pawn:
         Pawn(i,j,"white");
         break;
@@ -317,12 +305,15 @@ function movePiece(i,j){
     
     pieceToMove = getPiece(x,y);
     
-    let sourceSquare = getID(x,y);
     cancelSelect();
+    let sourceSquare = getID(x,y);
     sourceSquare.textContent = " ";
+    currentBoard[x][y] = " ";
 
     let destinationSquare = getID(i,j);
     destinationSquare.textContent = pieceToMove;
+    currentBoard[i][j] = pieceToMove;
+    setColor(i,j,destinationSquare);//only needed if we capture 
     
     changeTurn();
 }
@@ -337,4 +328,19 @@ function changeTurn()
     {
         turn = "white";
     }
+}
+
+function arrayExistsIn2dArray(twoDimArr , i , j)
+{
+            let foundMove = false;
+            for (let index = 0 ; index < twoDimArr.length ; index++)//can be replaced by checking whether we have a move-dot in there or not
+            {
+                if (EqualArray(twoDimArr[index],[i,j]))
+                {
+                    foundMove = true;
+                    break;
+                }
+            }
+
+            return foundMove;
 }
