@@ -85,15 +85,34 @@ function setBoard(i , j)
 
 function selectPiece(i , j , piece )
 {
-    if ((piece == " " && EqualArray(nothingSelected,selected)) || getPieceColor(piece) != turn )
+    if (piece != " " && getPieceColor(piece) != turn)
     {
         return ;
     }
 
-    // if (!EqualArray(nothingSelected,selected) )
-    // {
+    else if (piece == " " )
+    {
+        if ( isSomethingSelected() == false) {
+            return ;
+        }
 
-    // }
+        else 
+        {
+            let foundMove = false;
+            for (let index = 0 ; index < moves.length ; index++)//can be replaced by checking whether we have a move-dot in there or not
+            {
+                if (EqualArray(moves[index],[i,j]))
+                {
+                    foundMove = true;
+                    break;
+                }
+            }
+
+            if (foundMove){
+                movePiece(i,j);
+            }
+        }
+    }
 
     else{
         cancelSelect();
@@ -103,7 +122,6 @@ function selectPiece(i , j , piece )
         selected = [i ,j];
 
         showMoves(i,j,piece);
-
 
     }
 }
@@ -117,11 +135,12 @@ function getPieceColor(symbol) {
     else if (code >= 0x265A && code <= 0x265F) {
         return "black";
     }
+    return "empty";
 }
 
 function cancelSelect()
 {
-    if ( EqualArray(nothingSelected,selected) == false ){
+    if ( isSomethingSelected() == true ){
         let x = selected[0];
         let y = selected[1];
         setColor(x,y,getID(x,y));    
@@ -130,22 +149,21 @@ function cancelSelect()
         return ;
     }
     
-    console.log("HI!");
-    for (let index = 0 ; index < 2 ; index++)
+    for (let index = 0 ; index < moves.length ; index++)
     {
-        let boxParent = getID(moves[index][0],moves[index][1]);
+        let boxParent = getID(moves[index][0],moves[index][1]);//removing the move-dots
         boxParent.removeChild(boxParent.lastChild);
     }
 
     for (let index = 0 ; index < captureMoves.length ; index++)
     {
-        let x = captureMoves[index][0];
+        let x = captureMoves[index][0];//removing the red squares
         let y = captureMoves[index][1];
         setColor(x,y,getID(x,y));
     }
 
     moves = [];
-    captureMoves = [];
+    captureMoves = [];//resetting
 
 }
 
@@ -274,4 +292,24 @@ function getColor(i,j)
 function getID(i,j)
 {
     return document.getElementById("square"+i+j);
+}
+
+function isSomethingSelected()
+{
+    return !EqualArray(nothingSelected,selected);
+}
+
+function movePiece(i,j){
+    let x = selected[0];
+    let y = selected[1];
+    
+    pieceToMove = getPiece(x,y);
+    
+    let sourceSquare = getID(x,y);
+    cancelSelect();
+    sourceSquare.textContent = " ";
+
+    let destinationSquare = getID(i,j);
+    destinationSquare.textContent = pieceToMove;
+    
 }
