@@ -9,7 +9,7 @@ const chessPiecesMap = {
 };
 
 // let currentBoard = create2DArray(8);
-let turn = "black";
+let turn = "white";
 let selected = [-1,-1];
 let nothingSelected = [ - 1 , -1]; //constant array
 let moves = [];
@@ -195,7 +195,10 @@ function showMoves(i , j , piece)
 {
     switch (piece) {
     case chessPiecesMap.b_pawn:
-        blackPawn(i,j);
+        Pawn(i,j,"black");
+        break;
+    case chessPiecesMap.w_pawn:
+        Pawn(i,j,"white");
         break;
     }
     
@@ -216,12 +219,21 @@ function showMoves(i , j , piece)
 
 }
 
-function blackPawn(i,j)
+function Pawn(i,j,color)
 {
-    let forward = [[i+1,j]];
-    if (i == 1)
+    let direct = 1;
+    let startingRow = 1;
+    if (color == "white")
     {
-        forward.push([i+2,j]);
+        direct = -1;
+        startingRow = 6;
+    }
+
+
+    let forward = [[i+direct,j]];
+    if (i == startingRow)
+    {
+        forward.push([i+2*direct,j]);
     }
     let clr = getColor(i,j);
 
@@ -238,7 +250,7 @@ function blackPawn(i,j)
         }
     }
 
-    let diagonal = [[i+1,j-1],[i+1,j+1]];
+    let diagonal = [[i+direct,j-1],[i+direct,j+1]];
 
     for (let a = 0 ; a<diagonal.length ; a++)
     {
@@ -312,4 +324,17 @@ function movePiece(i,j){
     let destinationSquare = getID(i,j);
     destinationSquare.textContent = pieceToMove;
     
+    changeTurn();
+}
+
+function changeTurn()
+{
+    if (turn == "white"){
+        turn = "black";
+    }
+
+    else if (turn == "black")
+    {
+        turn = "white";
+    }
 }
