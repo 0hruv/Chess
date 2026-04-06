@@ -188,6 +188,12 @@ function showMoves(i , j , piece)
     case chessPiecesMap.w_pawn:
         Pawn(i,j,"white");
         break;
+
+    case chessPiecesMap.b_bishop:
+    case chessPiecesMap.w_bishop:
+        bishop(i,j);
+        break;
+
     }
     
     for (let a = 0 ; a < moves.length ; a++)
@@ -216,7 +222,6 @@ function Pawn(i,j,color)
         direct = -1;
         startingRow = 6;
     }
-
 
     let forward = [[i+direct,j]];
     if (i == startingRow)
@@ -250,6 +255,8 @@ function Pawn(i,j,color)
         }
     }
 }
+
+
 
 function checkObstruction(i,j,color)
 {
@@ -343,4 +350,26 @@ function arrayExistsIn2dArray(twoDimArr , i , j)
             }
 
             return foundMove;
+}
+
+function bishop(i,j)
+{
+    let row = [1 , -1 , 1 , -1];
+    let col = [1 , -1 , -1 , 1];
+
+    let color = getColor(i,j);
+
+    for (let index = 0 ; index < 4 ; index++){
+        let mul = 1;
+
+        while(checkObstruction(i+mul*(row[index]) , j+ mul*(col[index]) , color) == 0)
+        {
+            moves.push([i+mul*(row[index]) , j+ mul*(col[index])]);
+            mul++;
+        }
+        if (checkObstruction(i+mul*(row[index]) , j+ mul*(col[index]) , color) == 2)
+        {
+            captureMoves.push([i+mul*(row[index]) , j+ mul*(col[index])]);
+        }
+    }
 }
