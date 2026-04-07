@@ -8,6 +8,7 @@ const chessPiecesMap = {
     b_king: "♚", b_queen: "♛", b_rook: "♜", b_bishop: "♝", b_knight: "♞", b_pawn: "♟"
 };
 
+let gameOn = true;
 let currentBoard = create2DArray(8);
 let turn = "white";
 let selected = [-1,-1];
@@ -85,6 +86,11 @@ function setBoard(i , j)
 
 function selectPiece(i , j , piece )
 {
+    if (gameOn == false)
+    {
+        return ;
+    }
+
     if (isSomethingSelected() == false && getPieceColor(piece) != turn)//works for selecting either empty spaces or non-turn pieces
     {
         return ;
@@ -177,7 +183,7 @@ function EqualArray( a , b)
 
 }
 
-function showMoves(i , j , piece)
+function pieceMenu(i,j,piece)
 {
     switch (piece) {
     
@@ -214,7 +220,13 @@ function showMoves(i , j , piece)
         knight(i,j);
         break;
     }
+}
+
+function showMoves(i , j , piece)
+{
     
+    pieceMenu(i,j,piece);
+
     for (let a = 0 ; a < moves.length ; a++)
     {
         let possibleMove = getID(moves[a][0] ,moves[a][1]);
@@ -340,8 +352,47 @@ function movePiece(i,j){
     destinationSquare.textContent = pieceToMove;
     currentBoard[i][j] = pieceToMove;
     setColor(i,j,destinationSquare);//only needed if we capture 
+
+    if (isEnemyKingAlive() == false)
+    {
+        gameOn = false;
+        alert(turn + " has won the game!");
+        return;
+    }
+
+    let kingPos = getCoordinates(getEnemyKing()); //this needs to be reworked!
+
+    if (checkForCheck(kingPos) == true)
+    {
+        getID(kingPos[0],kingPos[1]).style.backgroundColor = "#2c67e6";
+    }
     
     changeTurn();
+}
+
+function getCoordinates(piece)
+{
+    for (let i = 0 ; i < 8 ; i++)
+    {
+        for (let j = 0 ; j < 8 ; j++)
+        {
+            if (getPiece(i,j) == piece)
+            {
+                return [i,j];
+            }
+        }
+    }
+}
+
+function getEnemyKing()
+{
+    let enemyKing = chessPiecesMap.w_king;
+    if (turn == "white")
+    {
+        enemyKing = chessPiecesMap.b_king;
+    }
+
+    return enemyKing;
 }
 
 function changeTurn()
@@ -450,4 +501,57 @@ function kingAndKnight(row , col , i  , j)
             captureMoves.push([x,y]);
         }
     }
+}
+
+function isEnemyKingAlive()
+{
+    let kingToCheck =   getEnemyKing()
+
+    for (let i = 0 ; i < 8 ; i++)
+    {
+        for (let j = 0; j < 8 ; j++)
+        {
+            if (getPiece(i,j) == kingToCheck){
+                return true;
+            } 
+        }
+    }
+
+    return false;
+}
+
+function checkForCheck(x,y)
+{
+    
+    for (let i = 0 ; i < 8 ; i++)
+    {
+        for (let j = 0 ; j < 8 ; j++)
+        {
+            if (getColor(i,j) == turn)
+            {
+                continue;
+            }
+
+            else{
+                pieceMenu(i,j,getPiece(i,j));
+            }
+        }
+    }
+
+
+    let kingChecked = false;
+
+    for (let index = 0 ; index < captureMoves.length ; index++)
+    {
+        if (EqualArray(captureMoves[index],[x,y]))
+        {
+            kingChecked = true;
+            break;
+        }
+    }
+
+    moves = [];//resetting
+    captureMoves = [];
+
+    return kingChecked;
 }
