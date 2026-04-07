@@ -194,6 +194,25 @@ function showMoves(i , j , piece)
         bishop(i,j);
         break;
 
+    case chessPiecesMap.b_rook:
+    case chessPiecesMap.w_rook:
+        rook(i,j);
+        break;
+    
+    case chessPiecesMap.b_queen:
+    case chessPiecesMap.w_queen:
+        queen(i,j);
+        break;
+
+    case chessPiecesMap.b_king:
+    case chessPiecesMap.w_king:
+        king(i,j);
+        break;
+
+    case chessPiecesMap.b_knight:
+    case chessPiecesMap.w_knight:
+        knight(i,j);
+        break;
     }
     
     for (let a = 0 ; a < moves.length ; a++)
@@ -357,19 +376,78 @@ function bishop(i,j)
     let row = [1 , -1 , 1 , -1];
     let col = [1 , -1 , -1 , 1];
 
+    bishopAndRook(row,col,i,j);
+}
+
+function rook(i,j)
+{
+    let row = [1 , -1 , 0 , 0];
+    let col = [0 , 0 , 1 , -1];
+
+    bishopAndRook(row,col,i,j);
+}
+
+function queen(i,j)
+{
+    bishop(i,j);
+    rook(i,j);
+}
+
+function bishopAndRook(row , col , i , j)
+{
     let color = getColor(i,j);
 
     for (let index = 0 ; index < 4 ; index++){
-        let mul = 1;
+        let x = i + row[index];
+        let y = j + col[index];        
 
-        while(checkObstruction(i+mul*(row[index]) , j+ mul*(col[index]) , color) == 0)
+        while(checkObstruction(x , y , color) == 0)
         {
-            moves.push([i+mul*(row[index]) , j+ mul*(col[index])]);
-            mul++;
+            moves.push([x , y]);
+            x += row[index];
+            y += col[index];
         }
-        if (checkObstruction(i+mul*(row[index]) , j+ mul*(col[index]) , color) == 2)
+        if (checkObstruction(x , y, color) == 2)
         {
-            captureMoves.push([i+mul*(row[index]) , j+ mul*(col[index])]);
+            captureMoves.push([x, y]);
+        }
+    }
+}
+
+function king(i ,j)
+{
+    let row = [1 , 1 , 1 , 0 , -1,  -1 , -1 , 0]
+    let col = [-1 , 0 , 1 , 1 , 1 , 0 , -1 , -1]
+
+    kingAndKnight(row,col,i,j);
+}
+
+function knight(i,j)
+{
+    let row = [2,2,-1,1,-2,-2,1,-1];
+    let col = [-1,1,2,2,1,-1,-2,-2];
+
+    kingAndKnight(row,col,i,j);
+}
+
+function kingAndKnight(row , col , i  , j)
+{
+    let color = getColor(i,j);
+
+    for (let index = 0 ; index < row.length ; index++)
+    {
+        x = row[index] + i;
+        y = col[index] + j;
+        
+        let typeOfPiece = checkObstruction(x,y,color);
+
+        if (typeOfPiece == 0)
+        {
+            moves.push([x,y]);
+        }
+        else if (typeOfPiece == 2)
+        {
+            captureMoves.push([x,y]);
         }
     }
 }
