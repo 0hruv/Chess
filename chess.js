@@ -310,7 +310,7 @@ function checkObstruction(i,j,color)
 
 function getPiece(i,j)
 {
-    return getID(i,j).textContent;
+    return currentBoard[i][j];
 }
 
 function inBoundary(i,j)
@@ -338,6 +338,7 @@ function isSomethingSelected()
 }
 
 function movePiece(i,j){
+    
     let x = selected[0];
     let y = selected[1];
     
@@ -505,7 +506,7 @@ function kingAndKnight(row , col , i  , j)
 
 function isEnemyKingAlive()
 {
-    let kingToCheck =   getEnemyKing()
+    let kingToCheck =  getEnemyKing()
 
     for (let i = 0 ; i < 8 ; i++)
     {
