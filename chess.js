@@ -345,13 +345,25 @@ function movePiece(i,j){
     pieceToMove = getPiece(x,y);
     
     cancelSelect();
+
+    let pieceAtDestination = getPiece(i,j);
+    currentBoard[x][y] = " ";
+    currentBoard[i][j] = pieceToMove;
+    
+    let kingCoordinates = getCoordinates(getKing(turn));
+
+    if (checkForCheck(kingCoordinates[0],kingCoordinates[1],turn)){
+        alert("illegal move by " + turn + " ! You can't keep or place your king in check");
+        currentBoard[x][y] = pieceToMove;
+        currentBoard[i][j] = pieceAtDestination;
+        return ;
+    }
+
     let sourceSquare = getID(x,y);
     sourceSquare.textContent = " ";
-    currentBoard[x][y] = " ";
-
+    
     let destinationSquare = getID(i,j);
     destinationSquare.textContent = pieceToMove;
-    currentBoard[i][j] = pieceToMove;
     setColor(i,j,destinationSquare);//only needed if we capture 
 
     if (isEnemyKingAlive() == false)
@@ -361,12 +373,20 @@ function movePiece(i,j){
         return;
     }
 
-    let kingPos = getCoordinates(getEnemyKing()); //this needs to be reworked!
+    enemyKingCoordinates = getCoordinates(getKing(reverseColor(turn)));
 
-    if (checkForCheck(kingPos) == true)
-    {
-        getID(kingPos[0],kingPos[1]).style.backgroundColor = "#2c67e6";
+    if (checkForCheck(enemyKingCoordinates[0],enemyKingCoordinates[1],reverseColor(turn))){
+        // if (checkForCheckmate() == true){
+        //     gameOn = false;
+        //     alert(turn + " has won the game!");
+        //     return;
+        // }
+        alert(reverseColor(turn) + " king checked!");
+        console.log(reverseColor(turn) + " king checked!");
     }
+
+    moves = [];
+    captureMoves = [];
     
     changeTurn();
 }
@@ -383,17 +403,6 @@ function getCoordinates(piece)
             }
         }
     }
-}
-
-function getEnemyKing()
-{
-    let enemyKing = chessPiecesMap.w_king;
-    if (turn == "white")
-    {
-        enemyKing = chessPiecesMap.b_king;
-    }
-
-    return enemyKing;
 }
 
 function changeTurn()
@@ -506,7 +515,7 @@ function kingAndKnight(row , col , i  , j)
 
 function isEnemyKingAlive()
 {
-    let kingToCheck =  getEnemyKing()
+    let kingToCheck =  getKing(reverseColor(turn));
 
     for (let i = 0 ; i < 8 ; i++)
     {
@@ -521,14 +530,14 @@ function isEnemyKingAlive()
     return false;
 }
 
-function checkForCheck(x,y)
+function checkForCheck(x,y,clr)
 {
     
     for (let i = 0 ; i < 8 ; i++)
     {
         for (let j = 0 ; j < 8 ; j++)
         {
-            if (getColor(i,j) == turn)
+            if (getColor(i,j) == clr)
             {
                 continue;
             }
@@ -546,6 +555,7 @@ function checkForCheck(x,y)
     {
         if (EqualArray(captureMoves[index],[x,y]))
         {
+            console.log(turn + " king checked");
             kingChecked = true;
             break;
         }
@@ -555,4 +565,77 @@ function checkForCheck(x,y)
     captureMoves = [];
 
     return kingChecked;
+}
+
+function getKing(kingColour)
+{
+    if (kingColour == "white")
+    {
+        return chessPiecesMap.w_king;
+    }
+    if (kingColour == "black")
+    {
+        return chessPiecesMap.b_king;
+    }
+
+}
+
+function reverseColor(color)
+{
+    if (color == "white")
+    {
+        return "black";
+    }
+    return "white";
+}
+
+function checkForCheckmate()
+{
+    for (let i = 0 ; i < 8 ; i++)
+    {
+        for (let j = 0 ; j < 8 ; j++)
+        {
+            if (getColor(i,j) == reverseColor(turn))
+            {
+                let pieceToMove = getPiece(i,j);
+                pieceMenu(i,j,pieceToMove);
+
+                let copyMoves = moves;
+                
+                moves = [];
+                captureMoves = [];
+
+                let pieceAtDestination = getPiece(i,j);
+
+                for (let index = 0 ; index < copyMoves.length ; index++){
+
+                    let x = copyMoves[index][0];
+                    let y = copyMoves[index][1];
+
+                    currentBoard[i][j] = " ";
+                    currentBoard[x][y] = pieceToMove;
+                    
+                    let kingCoordinates = getCoordinates(getKing(reverseColor(turn)));
+
+                    if (checkForCheck(kingCoordinates[0],kingCoordinates[1],reverseColor(turn)) == false){
+                            moves = [];
+                            captureMoves = [];
+
+                            return false;
+                        }
+                    
+                                        
+                    currentBoard[x][y] = pieceAtDestination;
+                    currentBoard[i][j] = pieceToMove;
+
+                }
+            }
+
+            moves = [];
+            captureMoves = [];
+
+        }
+    }
+
+    return true;
 }
