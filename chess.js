@@ -376,11 +376,11 @@ function movePiece(i,j){
     enemyKingCoordinates = getCoordinates(getKing(reverseColor(turn)));
 
     if (checkForCheck(enemyKingCoordinates[0],enemyKingCoordinates[1],reverseColor(turn))){
-        // if (checkForCheckmate() == true){
-        //     gameOn = false;
-        //     alert(turn + " has won the game!");
-        //     return;
-        // }
+         if (checkForCheckmate() == true){
+             gameOn = false;
+             alert(turn + " has won the game by checkmate!");
+             return;
+         }
         alert(reverseColor(turn) + " king checked!");
         console.log(reverseColor(turn) + " king checked!");
     }
@@ -555,7 +555,6 @@ function checkForCheck(x,y,clr)
     {
         if (EqualArray(captureMoves[index],[x,y]))
         {
-            console.log(turn + " king checked");
             kingChecked = true;
             break;
         }
@@ -602,15 +601,20 @@ function checkForCheckmate()
 
                 let copyMoves = moves;
                 
+            for (let it = 0 ; it < captureMoves.length ; it++)
+            {
+                copyMoves.push(captureMoves[it]);
+            }
+		
                 moves = [];
                 captureMoves = [];
-
-                let pieceAtDestination = getPiece(i,j);
-
+               
                 for (let index = 0 ; index < copyMoves.length ; index++){
 
                     let x = copyMoves[index][0];
                     let y = copyMoves[index][1];
+
+		            let pieceAtDestination = getPiece(x,y);
 
                     currentBoard[i][j] = " ";
                     currentBoard[x][y] = pieceToMove;
@@ -618,10 +622,14 @@ function checkForCheckmate()
                     let kingCoordinates = getCoordinates(getKing(reverseColor(turn)));
 
                     if (checkForCheck(kingCoordinates[0],kingCoordinates[1],reverseColor(turn)) == false){
-                            moves = [];
-                            captureMoves = [];
+			    
+			            currentBoard[x][y] = pieceAtDestination;
+                    	currentBoard[i][j] = pieceToMove;
+				
+                        moves = [];
+                        captureMoves = [];
 
-                            return false;
+                        return false;
                         }
                     
                                         
